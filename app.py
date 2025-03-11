@@ -1,11 +1,7 @@
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-import os
 from sqlalchemy import create_engine
-#from dotenv import load_dotenv
-
-#load_dotenv()
+import pandas as pd
+import os
+import streamlit as st
 
 # Charger les données depuis PostgreSQL
 @st.cache_data  # Mise en cache pour optimiser les performances
@@ -15,24 +11,26 @@ def load_data():
     if DATABASE_URL is None:
         st.error("La variable d'environnement DATABASE_URL n'est pas définie.")
         return pd.DataFrame()  # Retourner un DataFrame vide si la variable d'environnement est manquante
-    
+
     # Créer l'engine de connexion pour PostgreSQL
     engine = create_engine(DATABASE_URL)
     
-    # Tester si la connexion est valide (cela peut aussi permettre de détecter d'autres erreurs)
-    with engine.connect() as conn:
-        try:
-            conn.execute('SELECT 1')  # Test simple de connexion
-        except Exception as e:
-            st.error(f"Erreur lors de la connexion à la base de données : {e}")
-            return pd.DataFrame()
-    
-    # Charger les données
+    # Tester la connexion en effectuant une simple requête
+    try:
+        with engine.connect() as conn:
+            conn.execute('SELECT 1')  # Test de la connexion
+    except Exception as e:
+        st.error(f"Erreur lors de la connexion à la base de données : {e}")
+        return pd.DataFrame()  # Retourner un DataFrame vide si la connexion échoue
+
+    # Si la connexion fonctionne, charger les données
     query = "SELECT * FROM artists"  # Adapte cette requête selon ta table
     df = pd.read_sql(query, engine)
     return df
 
 df = load_data()
+if not df.empty:
+    st.write(df)
 
 # Calcul des métriques
 num_artists = df["artist_id"].nunique()
