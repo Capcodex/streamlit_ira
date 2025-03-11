@@ -1,36 +1,24 @@
 from sqlalchemy import create_engine
 import pandas as pd
+import plotly.express as px
 import os
 import streamlit as st
+
+from dotenv import load_dotenv
+ 
+load_dotenv()
 
 # Charger les données depuis PostgreSQL
 @st.cache_data  # Mise en cache pour optimiser les performances
 def load_data():
-    # Récupérer la variable d'environnement DATABASE_URL
-    DATABASE_URL = os.getenv("DATABASE_URL")  # Railway définit automatiquement cette variable d'environnement
-    if DATABASE_URL is None:
-        st.error("La variable d'environnement DATABASE_URL n'est pas définie.")
-        return pd.DataFrame()  # Retourner un DataFrame vide si la variable d'environnement est manquante
-
-    # Créer l'engine de connexion pour PostgreSQL
+    DATABASE_URL = os.getenv("DATABASE_URL")  # Récupérer la variable d'environnement
     engine = create_engine(DATABASE_URL)
-    
-    # Tester la connexion en effectuant une simple requête
-    try:
-        with engine.connect() as conn:
-            conn.execute('SELECT 1')  # Test de la connexion
-    except Exception as e:
-        st.error(f"Erreur lors de la connexion à la base de données : {e}")
-        return pd.DataFrame()  # Retourner un DataFrame vide si la connexion échoue
-
-    # Si la connexion fonctionne, charger les données
     query = "SELECT * FROM artists"  # Adapte cette requête selon ta table
     df = pd.read_sql(query, engine)
     return df
 
+
 df = load_data()
-if not df.empty:
-    st.write(df)
 
 # Calcul des métriques
 num_artists = df["artist_id"].nunique()
