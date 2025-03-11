@@ -3,6 +3,9 @@ import pandas as pd
 import plotly.express as px
 import os
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Charger les données depuis PostgreSQL
 @st.cache_data  # Mise en cache pour optimiser les performances
