@@ -1,12 +1,18 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import os
+from sqlalchemy import create_engine
 
-# Charger les données
+# Charger les données depuis PostgreSQL
 @st.cache_data  # Mise en cache pour optimiser les performances
 def load_data():
-    df = pd.read_csv("df_clean.csv")  # Remplace par ton vrai fichier
+    DATABASE_URL = os.getenv("DATABASE_URL")  # Récupérer la variable d'environnement
+    engine = create_engine(DATABASE_URL)
+    query = "SELECT * FROM artists"  # Adapte cette requête selon ta table
+    df = pd.read_sql(query, engine)
     return df
+
 
 df = load_data()
 
