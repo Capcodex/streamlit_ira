@@ -58,5 +58,6 @@ uvicorn==0.33.0
 watchdog==4.0.2
 zipp==3.20.2
 psycopg2-binary
+sqlite3
 
 
