@@ -3,19 +3,34 @@ import pandas as pd
 import plotly.express as px
 import os
 from sqlalchemy import create_engine
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
-load_dotenv()
+#load_dotenv()
 
 # Charger les données depuis PostgreSQL
 @st.cache_data  # Mise en cache pour optimiser les performances
 def load_data():
-    DATABASE_URL = os.getenv("DATABASE_URL")  # Récupérer la variable d'environnement
+    # Récupérer la variable d'environnement DATABASE_URL
+    DATABASE_URL = os.getenv("DATABASE_URL")  # Railway définit automatiquement cette variable d'environnement
+    if DATABASE_URL is None:
+        st.error("La variable d'environnement DATABASE_URL n'est pas définie.")
+        return pd.DataFrame()  # Retourner un DataFrame vide si la variable d'environnement est manquante
+    
+    # Créer l'engine de connexion pour PostgreSQL
     engine = create_engine(DATABASE_URL)
+    
+    # Tester si la connexion est valide (cela peut aussi permettre de détecter d'autres erreurs)
+    with engine.connect() as conn:
+        try:
+            conn.execute('SELECT 1')  # Test simple de connexion
+        except Exception as e:
+            st.error(f"Erreur lors de la connexion à la base de données : {e}")
+            return pd.DataFrame()
+    
+    # Charger les données
     query = "SELECT * FROM artists"  # Adapte cette requête selon ta table
     df = pd.read_sql(query, engine)
     return df
-
 
 df = load_data()
 
